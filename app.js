@@ -16,10 +16,69 @@
   };
   const known = new Set(store.get("known", []));        // 외운 단어
   const solved = store.get("solved", {});               // 문법 퀴즈: { "topicId:idx": true/false }
-  const saveKnown = () => store.set("known", [...known]);
-  const saveSolved = () => store.set("solved", solved);
+  let updatedAt = store.get("updatedAt", 0);
+  const snapshot = () => ({ known: [...known], solved: Object.assign({}, solved), updatedAt });
+  function persist() {
+    updatedAt = Date.now();
+    store.set("known", [...known]); store.set("solved", solved); store.set("updatedAt", updatedAt);
+    if (typeof RC.onChange === "function") RC.onChange(snapshot());
+  }
+  const saveKnown = persist;
+  const saveSolved = persist;
+  function applyState(s, opts) {
+    if (!s || !Array.isArray(s.known) || typeof s.solved !== "object") return false;
+    known.clear(); s.known.forEach(w => known.add(w));
+    Object.keys(solved).forEach(k => delete solved[k]); Object.assign(solved, s.solved);
+    updatedAt = +s.updatedAt || Date.now();
+    store.set("known", [...known]); store.set("solved", solved); store.set("updatedAt", updatedAt);
+    if (!opts || opts.rerender !== false) route();
+    return true;
+  }
+  // 외부 저장소(Claude 페이지의 계정 저장)와 연결하기 위한 고리
+  const RC = window.RC = { snapshot, applyState, onChange: null };
+
+  // 백업 코드: 기록을 문자열 하나로 만들어 다른 기기로 옮기거나 보관
+  const toCode = () => "RC1:" + btoa(unescape(encodeURIComponent(JSON.stringify(snapshot()))));
+  function fromCode(code) {
+    try {
+      const s = JSON.parse(decodeURIComponent(escape(atob(code.trim().replace(/^RC1:/, "")))));
+      s.updatedAt = Date.now();
+      return applyState(s) ? s : null;
+    } catch (e) { return null; }
+  }
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  // ---- 발음 듣기 (기기에 내장된 영어 음성 사용) ----
+  const canSpeak = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+  let enVoice = null;
+  function pickVoice() {
+    if (!canSpeak) return;
+    const vs = speechSynthesis.getVoices().filter(v => /^en[-_]/i.test(v.lang));
+    enVoice = vs.find(v => /en[-_]US/i.test(v.lang) && /Samantha|Google|Alex|Ava|Allison/i.test(v.name))
+      || vs.find(v => /en[-_]US/i.test(v.lang)) || vs[0] || null;
+  }
+  if (canSpeak) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function speak(text, rate) {
+    if (!canSpeak) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = enVoice ? enVoice.lang : "en-US";
+      if (enVoice) u.voice = enVoice;
+      u.rate = rate || 0.9;
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+  const spk = (text, label) => canSpeak
+    ? `<button class="spk" data-say="${esc(text)}" aria-label="${label || "발음 듣기"}">${SPK_ICON}</button>` : "";
+  const SPK_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>';
+  document.addEventListener("click", e => {
+    const b = e.target.closest(".spk");
+    if (!b) return;
+    e.stopPropagation(); e.preventDefault();
+    speak(b.dataset.say, b.dataset.rate ? +b.dataset.rate : 0.9);
+  }, true);
+
   const days = [...new Set(VOCAB.map(v => v.day))].sort((a, b) => a - b);
   const quizTotal = GRAMMAR.reduce((n, g) => n + g.quiz.length, 0);
   const correctCount = () => Object.values(solved).filter(Boolean).length;
@@ -82,7 +141,35 @@
       <a class="card" href="#/tips">
         <span class="tag">팁</span><h2>파트별 시간 배분</h2>
         <div class="muted">Part 5·6은 20분, Part 7은 55분이 목표예요.</div>
-      </a>`;
+      </a>
+      <div class="section-title">기록 백업</div>
+      <div class="card">
+        <div class="muted" id="sync-note" style="margin-bottom:10px">${RC.syncNote || "공부 기록은 이 기기에 저장돼요. 다른 기기로 옮기거나 혹시 몰라 보관하려면 백업 코드를 복사해 두세요."}</div>
+        <div class="btns">
+          <button class="btn ghost" id="bk-copy">백업 코드 복사</button>
+          <button class="btn ghost" id="bk-open">백업 코드로 복원</button>
+        </div>
+        <div id="bk-area" hidden style="margin-top:10px">
+          <textarea id="bk-text" class="search" rows="3" placeholder="RC1:로 시작하는 백업 코드를 붙여넣으세요"></textarea>
+          <button class="btn" id="bk-apply">복원하기</button>
+        </div>
+        <div class="muted" id="bk-msg" style="margin-top:8px" hidden></div>
+      </div>`;
+    const $area = document.getElementById("bk-area"), $text = document.getElementById("bk-text"), $msg = document.getElementById("bk-msg");
+    const say = t => { $msg.hidden = false; $msg.textContent = t; };
+    document.getElementById("bk-copy").onclick = () => {
+      const code = toCode();
+      const fallback = () => { $area.hidden = false; $text.value = code; $text.select(); say("코드를 길게 눌러 복사해 주세요."); };
+      try {
+        navigator.clipboard.writeText(code).then(() => say(`복사했어요. 메모 앱 등에 붙여넣어 보관하세요. (외운 단어 ${known.size}개)`), fallback);
+      } catch (e) { fallback(); }
+    };
+    document.getElementById("bk-open").onclick = () => { $area.hidden = false; $text.value = ""; $text.focus(); $msg.hidden = true; };
+    document.getElementById("bk-apply").onclick = () => {
+      const s = fromCode($text.value);
+      if (s) { home(); document.getElementById("bk-msg").hidden = false; document.getElementById("bk-msg").textContent = `복원했어요. 외운 단어 ${s.known.length}개를 불러왔어요.`; }
+      else say("코드를 읽지 못했어요. RC1:로 시작하는 코드 전체를 붙여넣었는지 확인해 주세요.");
+    };
   }
 
   // ---- 문법 ----
@@ -158,7 +245,7 @@
       $words.innerHTML = list.length ? list.map(v => `
         <div class="card word">
           <button class="check ${known.has(v.word) ? "on" : ""}" data-w="${esc(v.word)}" aria-label="외움 표시">✓</button>
-          <div><div><span class="w">${esc(v.word)}</span><span class="pos">${esc(v.pos)}</span></div>
+          <div><div><span class="w">${esc(v.word)}</span><span class="pos">${esc(v.pos)}</span>${spk(v.word)}</div>
           <div>${esc(v.meaning)}</div><div class="ex-s">${esc(v.ex)}</div></div>
         </div>`).join("") : `<div class="empty">검색 결과가 없어요.</div>`;
       $words.querySelectorAll(".check").forEach(b => b.addEventListener("click", () => {
@@ -190,6 +277,7 @@
         <div class="muted" style="text-align:center;margin-bottom:8px">${i + 1} / ${deck.length}</div>
         <div class="card flash" id="card">
           <div class="big">${esc(v.word)}</div><div class="muted">${esc(v.pos)}</div>
+          ${canSpeak ? `<div class="say-row"><button class="spk pill" data-say="${esc(v.word)}">${SPK_ICON} 단어</button><button class="spk pill" data-say="${esc(v.ex)}" data-rate="0.85">${SPK_ICON} 예문</button></div>` : ""}
           ${flipped ? `<div class="meaning">${esc(v.meaning)}</div><div class="muted" style="margin-top:8px">${esc(v.ex)}</div>`
                     : `<div class="muted" style="margin-top:16px">탭해서 뜻 보기</div>`}
         </div>
@@ -234,6 +322,9 @@
   }
   window.addEventListener("hashchange", route);
   route();
+
+  // 브라우저가 저장 공간을 임의로 비우지 않도록 요청 (지원하는 경우)
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
 
   if ("serviceWorker" in navigator && location.protocol !== "file:") {
     navigator.serviceWorker.register("sw.js").catch(() => {});

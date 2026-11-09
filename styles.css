@@ -129,3 +129,13 @@ ul.points li { margin-bottom: 6px; }
 .dday { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dday .dd { font-size: 34px; font-weight: 800; color: var(--accent); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .chip.done:not(.on) { border-color: var(--ok); color: var(--ok); }
+
+.spk {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px; vertical-align: middle;
+  width: 32px; height: 32px; margin-left: 6px; border-radius: 50%; border: 0;
+  background: var(--accent-soft); color: var(--accent); font: inherit; font-size: 14px; font-weight: 600;
+}
+.spk:active { transform: scale(.94); }
+.spk.pill { width: auto; height: 34px; padding: 0 14px; border-radius: 999px; margin: 0; }
+.say-row { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
+.spk:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

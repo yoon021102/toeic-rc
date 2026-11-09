@@ -1,5 +1,5 @@
 // 오프라인 캐시. 콘텐츠를 바꾸면 VERSION 숫자를 올려주세요.
-const VERSION = "v2";
+const VERSION = "v3";
 const FILES = ["./", "index.html", "styles.css", "app.js", "manifest.webmanifest",
   "data/grammar.js", "data/vocab.js", "data/tips.js",
   "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
