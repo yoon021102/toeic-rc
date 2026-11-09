@@ -24,6 +24,19 @@
   const quizTotal = GRAMMAR.reduce((n, g) => n + g.quiz.length, 0);
   const correctCount = () => Object.values(solved).filter(Boolean).length;
 
+  // ---- 시험 일정: 시작일부터 하루에 Day 하나씩 ----
+  const DAY_MS = 86400000;
+  const localDate = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const today0 = () => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); };
+  const examDate = localDate(window.EXAM_DATE || "2026-11-22");
+  const startDate = localDate(window.STUDY_START || "2026-11-09");
+  const dDay = () => Math.round((examDate - today0()) / DAY_MS);
+  const todayDay = () => Math.min(days[days.length - 1], Math.max(days[0], Math.floor((today0() - startDate) / DAY_MS) + 1));
+  const dayDate = d => { const t = new Date(startDate.getTime() + (d - 1) * DAY_MS); return `${t.getMonth() + 1}/${t.getDate()}`; };
+  const theme = d => (window.DAY_THEMES || {})[d] || "";
+  const knownIn = d => VOCAB.filter(v => v.day === d && known.has(v.word)).length;
+  const countIn = d => VOCAB.filter(v => v.day === d).length;
+
   function setHeader(title, backTo) {
     $title.textContent = title;
     $back.hidden = !backTo;
@@ -38,18 +51,30 @@
     setHeader("토익 RC 노트"); setTab("home");
     const kPct = Math.round(known.size / VOCAB.length * 100);
     const qPct = Math.round(correctCount() / quizTotal * 100);
-    const nextDay = days.find(d => VOCAB.filter(v => v.day === d).some(v => !known.has(v.word))) || days[0];
+    const td = todayDay();
+    const behind = days.filter(d => d < td && knownIn(d) < countIn(d));
     const nextTopic = GRAMMAR.find(g => g.quiz.some((_, i) => !solved[g.id + ":" + i])) || GRAMMAR[0];
+    const dd = dDay();
+    const ddText = dd > 0 ? `D-${dd}` : dd === 0 ? "D-DAY" : "시험 끝!";
     $view.innerHTML = `
+      <div class="card dday">
+        <div><div class="muted">토익 시험 11월 22일</div><div class="dd">${ddText}</div></div>
+        <div class="muted" style="text-align:right">오늘 목표<br><b style="color:var(--text)">Day ${td} 단어 100개</b></div>
+      </div>
       <div class="stats">
         <div class="stat"><span class="muted">외운 단어</span><b>${known.size} / ${VOCAB.length}</b><div class="bar"><i style="width:${kPct}%"></i></div></div>
         <div class="stat"><span class="muted">문법 퀴즈 정답</span><b>${correctCount()} / ${quizTotal}</b><div class="bar"><i style="width:${qPct}%"></i></div></div>
       </div>
       <div class="section-title">오늘 이어서 하기</div>
-      <a class="card" href="#/vocab/${nextDay}/cards">
-        <span class="tag">단어</span><h2>Day ${nextDay} 플래시카드</h2>
-        <div class="muted">아직 못 외운 단어 ${VOCAB.filter(v => v.day === nextDay && !known.has(v.word)).length}개</div>
+      <a class="card" href="#/vocab/${td}/cards/unknown">
+        <div class="row"><span class="tag">오늘의 단어 · ${dayDate(td)}</span><span class="muted">${knownIn(td)} / ${countIn(td)}</span></div>
+        <h2>Day ${td} · ${esc(theme(td))}</h2>
+        <div class="bar"><i style="width:${Math.round(knownIn(td) / countIn(td) * 100)}%"></i></div>
       </a>
+      ${behind.length ? `<a class="card" href="#/vocab/${behind[0]}/cards/unknown">
+        <span class="tag">밀린 단어</span><h2>Day ${behind.map(d => d).join(", ")}</h2>
+        <div class="muted">못 외운 단어 ${behind.reduce((n, d) => n + countIn(d) - knownIn(d), 0)}개가 남아 있어요. Day ${behind[0]}부터 이어서 하세요.</div>
+      </a>` : ""}
       <a class="card" href="#/grammar/${nextTopic.id}">
         <span class="tag">문법</span><h2>${esc(nextTopic.title)}</h2>
         <div class="muted">${esc(nextTopic.summary)}</div>
@@ -110,16 +135,19 @@
   // ---- 단어 ----
   let vocabQuery = "";
   function vocabList(day) {
-    day = day ? +day : days[0];
+    day = day ? +day : todayDay();
     setHeader("빈출 단어"); setTab("vocab");
     $view.innerHTML = `
-      <div class="chips">${days.map(d => `<a class="chip ${d === day ? "on" : ""}" href="#/vocab/${d}">Day ${d}</a>`).join("")}</div>
+      <div class="chips">${days.map(d => `<a class="chip ${d === day ? "on" : ""}${knownIn(d) === countIn(d) ? " done" : ""}" href="#/vocab/${d}">Day ${d}</a>`).join("")}</div>
+      <div class="row" style="margin:0 4px 10px"><div><b>${esc(theme(day))}</b> <span class="muted">· ${dayDate(day)}</span></div><span class="muted">외움 ${knownIn(day)} / ${countIn(day)}</span></div>
       <input class="search" type="search" placeholder="전체 단어 검색 (영어 또는 뜻)" value="${esc(vocabQuery)}">
       <div class="btns" style="margin-bottom:12px">
         <a class="btn" href="#/vocab/${day}/cards">플래시카드</a>
         <a class="btn ghost" href="#/vocab/${day}/cards/unknown">못 외운 것만</a>
       </div>
       <div id="words"></div>`;
+    const $chips = $view.querySelector(".chips"), $on = $chips.querySelector(".chip.on");
+    if ($on) $chips.scrollLeft = $on.offsetLeft - ($chips.clientWidth - $on.offsetWidth) / 2;
     const $words = document.getElementById("words");
     const $search = $view.querySelector(".search");
 
@@ -137,6 +165,8 @@
         const w = b.dataset.w;
         known.has(w) ? known.delete(w) : known.add(w);
         saveKnown(); b.classList.toggle("on");
+        const c = $view.querySelector(".row .muted:last-child");
+        if (c && !vocabQuery.trim()) c.textContent = `외움 ${knownIn(day)} / ${countIn(day)}`;
       }));
     }
     $search.addEventListener("input", () => { vocabQuery = $search.value; render(); });

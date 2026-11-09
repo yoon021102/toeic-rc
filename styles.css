@@ -125,3 +125,7 @@ ul.points li { margin-bottom: 6px; }
 .flash .big { font-size: 32px; font-weight: 800; }
 .flash .meaning { font-size: 22px; font-weight: 700; margin-top: 8px; }
 .empty { text-align: center; color: var(--sub); padding: 40px 0; }
+
+.dday { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dday .dd { font-size: 34px; font-weight: 800; color: var(--accent); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.chip.done:not(.on) { border-color: var(--ok); color: var(--ok); }

@@ -9,7 +9,7 @@
 | `app.js` | 화면 전환, 퀴즈 채점, 플래시카드, 학습 기록 저장 |
 | `styles.css` | 아이폰 스타일 (다크 모드, 노치 영역 대응) |
 | `data/grammar.js` | 문법 주제 8개 (핵심 포인트, 예문, 퀴즈) |
-| `data/vocab.js` | 빈출 단어 50개 (Day 1~5) |
+| `data/vocab.js` | 빈출 단어 1,300개 (Day 1~13, Day당 100개, 주제별) |
 | `data/tips.js` | Part 5 / 6 / 7 / 시간 관리 팁 |
 | `sw.js`, `manifest.webmanifest`, `icons/` | 오프라인 동작과 홈 화면 아이콘 |
 
