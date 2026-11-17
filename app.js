@@ -108,7 +108,8 @@
   // ---- 홈 ----
   function home() {
     setHeader("토익 RC 노트"); setTab("home");
-    const kPct = Math.round(known.size / VOCAB.length * 100);
+    const knownTotal = VOCAB.filter(v => known.has(v.word)).length;
+    const kPct = Math.round(knownTotal / VOCAB.length * 100);
     const qPct = Math.round(correctCount() / quizTotal * 100);
     const td = todayDay();
     const behind = days.filter(d => d < td && knownIn(d) < countIn(d));
@@ -118,16 +119,16 @@
     $view.innerHTML = `
       <div class="card dday">
         <div><div class="muted">토익 시험 11월 22일</div><div class="dd">${ddText}</div></div>
-        <div class="muted" style="text-align:right">오늘 목표<br><b style="color:var(--text)">Day ${td} 단어 100개</b></div>
+        <div class="muted" style="text-align:right">오늘 목표<br><b style="color:var(--text)">${esc(theme(td) || `Day ${td}`)} ${countIn(td)}개</b></div>
       </div>
       <div class="stats">
-        <div class="stat"><span class="muted">외운 단어</span><b>${known.size} / ${VOCAB.length}</b><div class="bar"><i style="width:${kPct}%"></i></div></div>
+        <div class="stat"><span class="muted">외운 단어</span><b>${knownTotal} / ${VOCAB.length}</b><div class="bar"><i style="width:${kPct}%"></i></div></div>
         <div class="stat"><span class="muted">문법 퀴즈 정답</span><b>${correctCount()} / ${quizTotal}</b><div class="bar"><i style="width:${qPct}%"></i></div></div>
       </div>
       <div class="section-title">오늘 이어서 하기</div>
       <a class="card" href="#/vocab/${td}/cards/unknown">
-        <div class="row"><span class="tag">오늘의 단어 · ${dayDate(td)}</span><span class="muted">${knownIn(td)} / ${countIn(td)}</span></div>
-        <h2>Day ${td} · ${esc(theme(td))}</h2>
+        <div class="row"><span class="tag">오늘의 단어</span><span class="muted">${knownIn(td)} / ${countIn(td)}</span></div>
+        <h2>${esc(theme(td) || `Day ${td}`)}</h2>
         <div class="bar"><i style="width:${Math.round(knownIn(td) / countIn(td) * 100)}%"></i></div>
       </a>
       ${behind.length ? `<a class="card" href="#/vocab/${behind[0]}/cards/unknown">
@@ -225,8 +226,8 @@
     day = day ? +day : todayDay();
     setHeader("빈출 단어"); setTab("vocab");
     $view.innerHTML = `
-      <div class="chips">${days.map(d => `<a class="chip ${d === day ? "on" : ""}${knownIn(d) === countIn(d) ? " done" : ""}" href="#/vocab/${d}">Day ${d}</a>`).join("")}</div>
-      <div class="row" style="margin:0 4px 10px"><div><b>${esc(theme(day))}</b> <span class="muted">· ${dayDate(day)}</span></div><span class="muted">외움 ${knownIn(day)} / ${countIn(day)}</span></div>
+      <div class="chips">${days.map(d => `<a class="chip ${d === day ? "on" : ""}${knownIn(d) === countIn(d) ? " done" : ""}" href="#/vocab/${d}">${esc(theme(d) || `Day ${d}`)}</a>`).join("")}</div>
+      <div class="row" style="margin:0 4px 10px"><div><b>${esc(theme(day))}</b></div><span class="muted">외움 ${knownIn(day)} / ${countIn(day)}</span></div>
       <input class="search" type="search" placeholder="전체 단어 검색 (영어 또는 뜻)" value="${esc(vocabQuery)}">
       <div class="btns" style="margin-bottom:12px">
         <a class="btn" href="#/vocab/${day}/cards">플래시카드</a>
@@ -246,7 +247,7 @@
         <div class="card word">
           <button class="check ${known.has(v.word) ? "on" : ""}" data-w="${esc(v.word)}" aria-label="외움 표시">✓</button>
           <div><div><span class="w">${esc(v.word)}</span><span class="pos">${esc(v.pos)}</span>${spk(v.word)}</div>
-          <div>${esc(v.meaning)}</div><div class="ex-s">${esc(v.ex)}</div></div>
+          <div>${esc(v.meaning)}</div>${v.ex ? `<div class="ex-s">${esc(v.ex)}</div>` : ""}</div>
         </div>`).join("") : `<div class="empty">검색 결과가 없어요.</div>`;
       $words.querySelectorAll(".check").forEach(b => b.addEventListener("click", () => {
         const w = b.dataset.w;
@@ -264,9 +265,9 @@
     day = +day;
     let deck = VOCAB.filter(v => v.day === day && (mode !== "unknown" || !known.has(v.word)));
     deck = deck.sort(() => Math.random() - 0.5);
-    setHeader(`Day ${day} 플래시카드`, `#/vocab/${day}`); setTab("vocab");
+    setHeader(`${theme(day) || `Day ${day}`} 플래시카드`, `#/vocab/${day}`); setTab("vocab");
     if (!deck.length) {
-      $view.innerHTML = `<div class="empty">Day ${day} 단어를 모두 외웠어요! 🎉</div>
+      $view.innerHTML = `<div class="empty">${esc(theme(day) || `Day ${day}`)} 단어를 모두 외웠어요! 🎉</div>
         <a class="btn ghost" href="#/vocab/${day}/cards">전체 다시 보기</a>`;
       return;
     }
@@ -277,8 +278,8 @@
         <div class="muted" style="text-align:center;margin-bottom:8px">${i + 1} / ${deck.length}</div>
         <div class="card flash" id="card">
           <div class="big">${esc(v.word)}</div><div class="muted">${esc(v.pos)}</div>
-          ${canSpeak ? `<div class="say-row"><button class="spk pill" data-say="${esc(v.word)}">${SPK_ICON} 단어</button><button class="spk pill" data-say="${esc(v.ex)}" data-rate="0.85">${SPK_ICON} 예문</button></div>` : ""}
-          ${flipped ? `<div class="meaning">${esc(v.meaning)}</div><div class="muted" style="margin-top:8px">${esc(v.ex)}</div>`
+          ${canSpeak ? `<div class="say-row"><button class="spk pill" data-say="${esc(v.word)}">${SPK_ICON} 단어</button>${v.ex ? `<button class="spk pill" data-say="${esc(v.ex)}" data-rate="0.85">${SPK_ICON} 예문</button>` : ""}</div>` : ""}
+          ${flipped ? `<div class="meaning">${esc(v.meaning)}</div>${v.ex ? `<div class="muted" style="margin-top:8px">${esc(v.ex)}</div>` : ""}`
                     : `<div class="muted" style="margin-top:16px">탭해서 뜻 보기</div>`}
         </div>
         <div class="btns">
