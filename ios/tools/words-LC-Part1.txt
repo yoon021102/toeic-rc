@@ -1,0 +1,80 @@
+[LC/Part1]
+carry 나르다, 휴대하다
+remove 벗다
+pour 붓다, 따르다
+beverage 음료
+light fixture 조명
+install 설치하다
+warehouse 창고
+meeting minutes 회의록
+accounting 회계
+assistant 보조, 조수
+account 계좌, 계정
+analyst 분석가
+decoration 장식(물)
+competent 유능한, 능숙한
+retreat 야유회, 짧은 여행
+solve 해결하다
+departure 출발, 떠남
+introduction 소개, 서문
+retirement 은퇴, 퇴직
+appointment 예약, 약속
+borrow 빌리다
+brochure 안내 책자
+confirmation 확인(서)
+process 절차, 과정
+expense 지출 , 경비
+finance 재무, 재정
+correct 맞는, 정확한
+demonstration 시연회, 시범
+charge 충전하다
+device 기기
+cost 비용이 들다
+extra 추가의, 여분의
+in charge of ~을 책임지는
+crew 작업팀, 조
+available 이용가능한
+depend on ~에 따라 다르다, ~에 달려 있다
+addition 추가(되는것)
+consider 고려하다
+lower 내리다, 낮추다
+headquarters 본사
+book 예약하다
+regional 지역의
+performance 성과, 실적, 공연
+advance 사전의
+payment 결제, 지불
+required 필요한
+sign up for ~에 등록하다, ~을 신청하다
+competition 대회
+merchandise 상품
+permit 허가(증)
+agree 동의하다, 합의하다
+annual 연례적인, 해마다의
+expand 연장하다, 확대하다
+take care of ~을 처리하다
+attendee 참석자
+job opening 공석, 빈자리
+author 작가, 저자
+reserve 예약하다
+revise 수정하다, 변경하다
+budget 예산
+get rid of ~을 없애다
+unfortunately 유감스럽게도, 안타깝게도
+operation 운영, 영업
+application 신청(서), 지원(서)
+directions 길 안내
+owner 소유주, 주인
+location 지점, 위치
+local 지역의, 현지의
+advantage 장점, 이점
+rental 임대, 대여
+release 출시하다, 발매하다
+issue 문제, 사안
+secure 확보하다, 얻다
+conduct 실시하다, 수행하다
+negotiate 협의하다, 협상하다
+maintenance 유지 관리
+randomly 무작위로
+complete 완료하다
+increase 증가하다

@@ -1,0 +1,404 @@
+{
+ "examDate": "2026-11-22",
+ "studyStart": "2026-11-09",
+ "themes": {
+  "1": "LC/Part1"
+ },
+ "words": [
+  {
+   "day": 1,
+   "word": "carry",
+   "meaning": "나르다, 휴대하다"
+  },
+  {
+   "day": 1,
+   "word": "remove",
+   "meaning": "벗다"
+  },
+  {
+   "day": 1,
+   "word": "pour",
+   "meaning": "붓다, 따르다"
+  },
+  {
+   "day": 1,
+   "word": "beverage",
+   "meaning": "음료"
+  },
+  {
+   "day": 1,
+   "word": "light fixture",
+   "meaning": "조명"
+  },
+  {
+   "day": 1,
+   "word": "install",
+   "meaning": "설치하다"
+  },
+  {
+   "day": 1,
+   "word": "warehouse",
+   "meaning": "창고"
+  },
+  {
+   "day": 1,
+   "word": "meeting minutes",
+   "meaning": "회의록"
+  },
+  {
+   "day": 1,
+   "word": "accounting",
+   "meaning": "회계"
+  },
+  {
+   "day": 1,
+   "word": "assistant",
+   "meaning": "보조, 조수"
+  },
+  {
+   "day": 1,
+   "word": "account",
+   "meaning": "계좌, 계정"
+  },
+  {
+   "day": 1,
+   "word": "analyst",
+   "meaning": "분석가"
+  },
+  {
+   "day": 1,
+   "word": "decoration",
+   "meaning": "장식(물)"
+  },
+  {
+   "day": 1,
+   "word": "competent",
+   "meaning": "유능한, 능숙한"
+  },
+  {
+   "day": 1,
+   "word": "retreat",
+   "meaning": "야유회, 짧은 여행"
+  },
+  {
+   "day": 1,
+   "word": "solve",
+   "meaning": "해결하다"
+  },
+  {
+   "day": 1,
+   "word": "departure",
+   "meaning": "출발, 떠남"
+  },
+  {
+   "day": 1,
+   "word": "introduction",
+   "meaning": "소개, 서문"
+  },
+  {
+   "day": 1,
+   "word": "retirement",
+   "meaning": "은퇴, 퇴직"
+  },
+  {
+   "day": 1,
+   "word": "appointment",
+   "meaning": "예약, 약속"
+  },
+  {
+   "day": 1,
+   "word": "borrow",
+   "meaning": "빌리다"
+  },
+  {
+   "day": 1,
+   "word": "brochure",
+   "meaning": "안내 책자"
+  },
+  {
+   "day": 1,
+   "word": "confirmation",
+   "meaning": "확인(서)"
+  },
+  {
+   "day": 1,
+   "word": "process",
+   "meaning": "절차, 과정"
+  },
+  {
+   "day": 1,
+   "word": "expense",
+   "meaning": "지출, 경비"
+  },
+  {
+   "day": 1,
+   "word": "finance",
+   "meaning": "재무, 재정"
+  },
+  {
+   "day": 1,
+   "word": "correct",
+   "meaning": "맞는, 정확한"
+  },
+  {
+   "day": 1,
+   "word": "demonstration",
+   "meaning": "시연회, 시범"
+  },
+  {
+   "day": 1,
+   "word": "charge",
+   "meaning": "충전하다"
+  },
+  {
+   "day": 1,
+   "word": "device",
+   "meaning": "기기"
+  },
+  {
+   "day": 1,
+   "word": "cost",
+   "meaning": "비용이 들다"
+  },
+  {
+   "day": 1,
+   "word": "extra",
+   "meaning": "추가의, 여분의"
+  },
+  {
+   "day": 1,
+   "word": "in charge of",
+   "meaning": "~을 책임지는"
+  },
+  {
+   "day": 1,
+   "word": "crew",
+   "meaning": "작업팀, 조"
+  },
+  {
+   "day": 1,
+   "word": "available",
+   "meaning": "이용가능한"
+  },
+  {
+   "day": 1,
+   "word": "depend on",
+   "meaning": "~에 따라 다르다, ~에 달려 있다"
+  },
+  {
+   "day": 1,
+   "word": "addition",
+   "meaning": "추가(되는것)"
+  },
+  {
+   "day": 1,
+   "word": "consider",
+   "meaning": "고려하다"
+  },
+  {
+   "day": 1,
+   "word": "lower",
+   "meaning": "내리다, 낮추다"
+  },
+  {
+   "day": 1,
+   "word": "headquarters",
+   "meaning": "본사"
+  },
+  {
+   "day": 1,
+   "word": "book",
+   "meaning": "예약하다"
+  },
+  {
+   "day": 1,
+   "word": "regional",
+   "meaning": "지역의"
+  },
+  {
+   "day": 1,
+   "word": "performance",
+   "meaning": "성과, 실적, 공연"
+  },
+  {
+   "day": 1,
+   "word": "advance",
+   "meaning": "사전의"
+  },
+  {
+   "day": 1,
+   "word": "payment",
+   "meaning": "결제, 지불"
+  },
+  {
+   "day": 1,
+   "word": "required",
+   "meaning": "필요한"
+  },
+  {
+   "day": 1,
+   "word": "sign up for",
+   "meaning": "~에 등록하다, ~을 신청하다"
+  },
+  {
+   "day": 1,
+   "word": "competition",
+   "meaning": "대회"
+  },
+  {
+   "day": 1,
+   "word": "merchandise",
+   "meaning": "상품"
+  },
+  {
+   "day": 1,
+   "word": "permit",
+   "meaning": "허가(증)"
+  },
+  {
+   "day": 1,
+   "word": "agree",
+   "meaning": "동의하다, 합의하다"
+  },
+  {
+   "day": 1,
+   "word": "annual",
+   "meaning": "연례적인, 해마다의"
+  },
+  {
+   "day": 1,
+   "word": "expand",
+   "meaning": "연장하다, 확대하다"
+  },
+  {
+   "day": 1,
+   "word": "take care of",
+   "meaning": "~을 처리하다"
+  },
+  {
+   "day": 1,
+   "word": "attendee",
+   "meaning": "참석자"
+  },
+  {
+   "day": 1,
+   "word": "job opening",
+   "meaning": "공석, 빈자리"
+  },
+  {
+   "day": 1,
+   "word": "author",
+   "meaning": "작가, 저자"
+  },
+  {
+   "day": 1,
+   "word": "reserve",
+   "meaning": "예약하다"
+  },
+  {
+   "day": 1,
+   "word": "revise",
+   "meaning": "수정하다, 변경하다"
+  },
+  {
+   "day": 1,
+   "word": "budget",
+   "meaning": "예산"
+  },
+  {
+   "day": 1,
+   "word": "get rid of",
+   "meaning": "~을 없애다"
+  },
+  {
+   "day": 1,
+   "word": "unfortunately",
+   "meaning": "유감스럽게도, 안타깝게도"
+  },
+  {
+   "day": 1,
+   "word": "operation",
+   "meaning": "운영, 영업"
+  },
+  {
+   "day": 1,
+   "word": "application",
+   "meaning": "신청(서), 지원(서)"
+  },
+  {
+   "day": 1,
+   "word": "directions",
+   "meaning": "길 안내"
+  },
+  {
+   "day": 1,
+   "word": "owner",
+   "meaning": "소유주, 주인"
+  },
+  {
+   "day": 1,
+   "word": "location",
+   "meaning": "지점, 위치"
+  },
+  {
+   "day": 1,
+   "word": "local",
+   "meaning": "지역의, 현지의"
+  },
+  {
+   "day": 1,
+   "word": "advantage",
+   "meaning": "장점, 이점"
+  },
+  {
+   "day": 1,
+   "word": "rental",
+   "meaning": "임대, 대여"
+  },
+  {
+   "day": 1,
+   "word": "release",
+   "meaning": "출시하다, 발매하다"
+  },
+  {
+   "day": 1,
+   "word": "issue",
+   "meaning": "문제, 사안"
+  },
+  {
+   "day": 1,
+   "word": "secure",
+   "meaning": "확보하다, 얻다"
+  },
+  {
+   "day": 1,
+   "word": "conduct",
+   "meaning": "실시하다, 수행하다"
+  },
+  {
+   "day": 1,
+   "word": "negotiate",
+   "meaning": "협의하다, 협상하다"
+  },
+  {
+   "day": 1,
+   "word": "maintenance",
+   "meaning": "유지 관리"
+  },
+  {
+   "day": 1,
+   "word": "randomly",
+   "meaning": "무작위로"
+  },
+  {
+   "day": 1,
+   "word": "complete",
+   "meaning": "완료하다"
+  },
+  {
+   "day": 1,
+   "word": "increase",
+   "meaning": "증가하다"
+  }
+ ]
+}
