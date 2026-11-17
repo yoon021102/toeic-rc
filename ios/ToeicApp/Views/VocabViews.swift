@@ -13,8 +13,7 @@ struct VocabDayListView: View {
                 } label: {
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("Day \(day)").font(.headline)
-                            Text(content.theme(for: day)).font(.subheadline).foregroundStyle(.secondary)
+                            Text(content.theme(for: day)).font(.headline)
                         }
                         Spacer()
                         Text("\(progress.knownCount(in: words))/\(words.count)")
@@ -42,18 +41,18 @@ struct VocabDayView: View {
         let all = content.words(for: day)
         List {
             Section {
-                NavigationLink { FlashcardView(title: "Day \(day) 카드", words: all) } label: {
+                NavigationLink { FlashcardView(title: "\(content.theme(for: day)) 카드", words: all) } label: {
                     Label("플래시카드", systemImage: "rectangle.on.rectangle.angled")
                 }
-                NavigationLink { VocabQuizView(title: "Day \(day) 퀴즈", words: all) } label: {
+                NavigationLink { VocabQuizView(title: "\(content.theme(for: day)) 퀴즈", words: all) } label: {
                     Label("뜻 고르기 퀴즈", systemImage: "checklist")
                 }
             }
-            Section("\(content.theme(for: day)) · \(all.count)단어") {
+            Section("\(all.count)단어") {
                 ForEach(all) { WordRow(word: $0) }
             }
         }
-        .navigationTitle("Day \(day)")
+        .navigationTitle(content.theme(for: day))
     }
 }
 
@@ -67,10 +66,10 @@ struct WordRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(alignment: .firstTextBaseline) {
                     Text(word.word).font(.headline)
-                    Text(word.pos).font(.caption).foregroundStyle(.secondary)
+                    if let pos = word.pos { Text(pos).font(.caption).foregroundStyle(.secondary) }
                 }
                 Text(word.meaning)
-                Text(word.example).font(.footnote).foregroundStyle(.secondary)
+                if let ex = word.example { Text(ex).font(.footnote).foregroundStyle(.secondary) }
             }
             Spacer()
             Button {
@@ -134,9 +133,11 @@ struct FlashcardView: View {
         VStack(spacing: 12) {
             Text(word.word).font(.system(size: 36, weight: .bold))
             if flipped {
-                Text(word.pos).foregroundStyle(.secondary)
-                Text(word.meaning).font(.title2)
-                Text(word.example).font(.callout).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                if let pos = word.pos { Text(pos).foregroundStyle(.secondary) }
+                Text(word.meaning).font(.title2).multilineTextAlignment(.center)
+                if let ex = word.example {
+                    Text(ex).font(.callout).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                }
             } else {
                 Text("탭해서 뜻 보기").font(.footnote).foregroundStyle(.tertiary)
             }
@@ -183,7 +184,7 @@ struct VocabQuizView: View {
                 let q = questions[index]
                 Text("\(index + 1) / \(questions.count)").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                 Text(q.word.word).font(.system(size: 34, weight: .bold))
-                Text(q.word.pos).foregroundStyle(.secondary)
+                if let pos = q.word.pos { Text(pos).foregroundStyle(.secondary) }
                 ForEach(q.choices, id: \.self) { choice in
                     Button { choose(choice) } label: {
                         Text(choice).frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 6)
@@ -193,7 +194,7 @@ struct VocabQuizView: View {
                     .disabled(picked != nil)
                 }
                 if picked != nil {
-                    Text(q.word.example).font(.footnote).foregroundStyle(.secondary)
+                    if let ex = q.word.example { Text(ex).font(.footnote).foregroundStyle(.secondary) }
                     Button("다음") { index += 1; picked = nil }.buttonStyle(.borderedProminent)
                 }
                 Spacer()

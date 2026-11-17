@@ -4,9 +4,10 @@ import Observation
 struct VocabWord: Codable, Identifiable, Hashable {
     let day: Int
     let word: String
-    let pos: String
     let meaning: String
-    let example: String
+    /// 품사, 예문은 없어도 됩니다.
+    var pos: String? = nil
+    var example: String? = nil
     var id: String { word }
 }
 
@@ -64,7 +65,7 @@ final class ContentStore {
 
     func words(for day: Int) -> [VocabWord] { vocab.words.filter { $0.day == day } }
 
-    func theme(for day: Int) -> String { vocab.themes[String(day)] ?? "" }
+    func theme(for day: Int) -> String { vocab.themes[String(day)] ?? "Day \(day)" }
 
     var examDate: Date? { Self.dateFormatter.date(from: vocab.examDate) }
     var studyStart: Date? { Self.dateFormatter.date(from: vocab.studyStart) }

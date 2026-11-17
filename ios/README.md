@@ -22,14 +22,22 @@ ToeicApp/
   Models/Content.swift    JSON 콘텐츠 모델과 로딩, D-day 계산
   Models/ProgressStore.swift  학습 기록 (외운 단어, 오답 노트, 문법 정답) → UserDefaults
   Views/HomeView.swift    D-day, 오늘의 Day, 진도, 오답 노트
-  Views/VocabViews.swift  Day 목록, 단어 목록, 플래시카드, 뜻 고르기 퀴즈
+  Views/VocabViews.swift  단어장 세트 목록, 단어 목록, 플래시카드, 뜻 고르기 퀴즈
   Views/GrammarViews.swift 문법 설명, 예문, Part 5 형식 4지선다
   Views/TipsView.swift    파트별 풀이 팁, 기록 초기화
   Resources/*.json        단어/문법/팁 데이터
 ```
 
-## 콘텐츠 추가
-`Resources/vocab.json`, `grammar.json`, `tips.json` 에 같은 형식으로 항목을 넣으면 됩니다. 문법 텍스트의 `**굵게**` 는 굵은 글씨로 표시됩니다.
+## 단어 추가
+`tools/` 에 `words-이름.txt` 파일을 만들고 아래처럼 적은 뒤 `python3 tools/import_words.py` 를 실행하면 `vocab.json` 이 다시 만들어집니다. `[머리글]` 마다 단어장 세트 하나가 됩니다.
+```
+[LC/Part1]
+carry 나르다, 휴대하다
+in charge of ~을 책임지는
+```
+
+## 문법·팁 추가
+`Resources/grammar.json`, `tips.json` 에 같은 형식으로 항목을 넣으면 됩니다. `**굵게**` 는 굵은 글씨로 표시됩니다.
 
 ## Mac 없이 (Windows PC) 설치하기
 1. GitHub 저장소의 **Actions → iOS build** 에서 최신 실행을 열고 `ToeicApp-unsigned-ipa` 를 내려받아 압축을 풉니다.

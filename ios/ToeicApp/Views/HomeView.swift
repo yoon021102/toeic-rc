@@ -30,7 +30,7 @@ struct HomeView: View {
                         VocabDayView(day: today)
                     } label: {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Day \(today) · \(content.theme(for: today))").font(.headline)
+                            Text(content.theme(for: today)).font(.headline)
                             ProgressView(value: Double(progress.knownCount(in: todayWords)),
                                          total: Double(max(todayWords.count, 1)))
                             Text("\(progress.knownCount(in: todayWords)) / \(todayWords.count) 외움")
