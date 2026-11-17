@@ -139,3 +139,8 @@ ul.points li { margin-bottom: 6px; }
 .spk.pill { width: auto; height: 34px; padding: 0 14px; border-radius: 999px; margin: 0; }
 .say-row { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
 .spk:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---- 단어 뜻 고르기 퀴즈 ---- */
+.quiz-word { text-align: center; padding: 28px 16px; }
+.quiz-word .big { font-size: 32px; font-weight: 800; }
+.choice { min-height: 48px; }

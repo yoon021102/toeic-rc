@@ -16,11 +16,12 @@
   };
   const known = new Set(store.get("known", []));        // 외운 단어
   const solved = store.get("solved", {});               // 문법 퀴즈: { "topicId:idx": true/false }
+  const missed = new Set(store.get("missed", []));      // 단어 퀴즈 오답 노트
   let updatedAt = store.get("updatedAt", 0);
-  const snapshot = () => ({ known: [...known], solved: Object.assign({}, solved), updatedAt });
+  const snapshot = () => ({ known: [...known], solved: Object.assign({}, solved), missed: [...missed], updatedAt });
   function persist() {
     updatedAt = Date.now();
-    store.set("known", [...known]); store.set("solved", solved); store.set("updatedAt", updatedAt);
+    store.set("known", [...known]); store.set("solved", solved); store.set("missed", [...missed]); store.set("updatedAt", updatedAt);
     if (typeof RC.onChange === "function") RC.onChange(snapshot());
   }
   const saveKnown = persist;
@@ -29,6 +30,7 @@
     if (!s || !Array.isArray(s.known) || typeof s.solved !== "object") return false;
     known.clear(); s.known.forEach(w => known.add(w));
     Object.keys(solved).forEach(k => delete solved[k]); Object.assign(solved, s.solved);
+    if (Array.isArray(s.missed)) { missed.clear(); s.missed.forEach(w => missed.add(w)); store.set("missed", [...missed]); }
     updatedAt = +s.updatedAt || Date.now();
     store.set("known", [...known]); store.set("solved", solved); store.set("updatedAt", updatedAt);
     if (!opts || opts.rerender !== false) route();
@@ -95,6 +97,7 @@
   const theme = d => (window.DAY_THEMES || {})[d] || "";
   const knownIn = d => VOCAB.filter(v => v.day === d && known.has(v.word)).length;
   const countIn = d => VOCAB.filter(v => v.day === d).length;
+  const missedIn = d => VOCAB.filter(v => v.day === d && missed.has(v.word)).length;
 
   function setHeader(title, backTo) {
     $title.textContent = title;
@@ -130,6 +133,10 @@
         <div class="row"><span class="tag">오늘의 단어</span><span class="muted">${knownIn(td)} / ${countIn(td)}</span></div>
         <h2>${esc(theme(td) || `Day ${td}`)}</h2>
         <div class="bar"><i style="width:${Math.round(knownIn(td) / countIn(td) * 100)}%"></i></div>
+      </a>
+      <a class="card" href="#/vocab/${td}/quiz${missedIn(td) ? "/wrong" : ""}">
+        <span class="tag">4지선다</span><h2>뜻 고르기 퀴즈</h2>
+        <div class="muted">${missedIn(td) ? `틀린 단어 ${missedIn(td)}개를 다시 풀어 보세요.` : "단어를 보고 알맞은 뜻을 4개 중에서 골라요. 10문제씩."}</div>
       </a>
       ${behind.length ? `<a class="card" href="#/vocab/${behind[0]}/cards/unknown">
         <span class="tag">밀린 단어</span><h2>Day ${behind.map(d => d).join(", ")}</h2>
@@ -233,6 +240,11 @@
         <a class="btn" href="#/vocab/${day}/cards">플래시카드</a>
         <a class="btn ghost" href="#/vocab/${day}/cards/unknown">못 외운 것만</a>
       </div>
+      <div class="btns" style="margin-bottom:12px">
+        <a class="btn" href="#/vocab/${day}/quiz">뜻 고르기 퀴즈</a>
+        ${missedIn(day) ? `<a class="btn ghost" href="#/vocab/${day}/quiz/wrong">오답 ${missedIn(day)}개 다시</a>`
+                        : `<a class="btn ghost" href="#/vocab/${day}/quiz/all">전체 ${countIn(day)}문제</a>`}
+      </div>
       <div id="words"></div>`;
     const $chips = $view.querySelector(".chips"), $on = $chips.querySelector(".chip.on");
     if ($on) $chips.scrollLeft = $on.offsetLeft - ($chips.clientWidth - $on.offsetWidth) / 2;
@@ -303,6 +315,77 @@
     render();
   }
 
+  // ---- 단어 뜻 고르기 퀴즈 (4지선다) ----
+  // mode: 없음 = 10문제, "all" = 전체, "wrong" = 오답만
+  function vocabQuiz(day, mode) {
+    day = +day;
+    const name = theme(day) || `Day ${day}`;
+    setHeader(`${name} 퀴즈`, `#/vocab/${day}`); setTab("vocab");
+    const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    const pool = VOCAB.filter(v => v.day === day);
+    let items = mode === "wrong" ? pool.filter(v => missed.has(v.word)) : pool;
+    items = shuffle(items);
+    if (!mode) items = items.slice(0, 10);
+    if (!items.length) {
+      $view.innerHTML = `<div class="empty">틀린 단어가 없어요! 🎉</div>
+        <a class="btn" href="#/vocab/${day}/quiz">새 퀴즈 풀기</a>`;
+      return;
+    }
+    // 오답 보기: 같은 세트의 다른 뜻에서 고르고, 모자라면 전체 단어에서
+    function choicesFor(v) {
+      const others = m => m !== v.meaning;
+      let opts = shuffle([...new Set(pool.map(x => x.meaning).filter(others))]).slice(0, 3);
+      if (opts.length < 3) opts = opts.concat(shuffle([...new Set(VOCAB.map(x => x.meaning).filter(m => others(m) && !opts.includes(m)))]).slice(0, 3 - opts.length));
+      return shuffle(opts.concat(v.meaning));
+    }
+    let i = 0, score = 0;
+    const wrongs = [];
+    function render() {
+      const v = items[i], choices = choicesFor(v);
+      $view.innerHTML = `
+        <div class="row" style="margin:0 4px 8px"><span class="muted">${i + 1} / ${items.length}</span><span class="muted">맞힘 ${score}</span></div>
+        <div class="bar" style="margin:0 0 14px"><i style="width:${Math.round(i / items.length * 100)}%"></i></div>
+        <div class="card quiz-word">
+          <div class="big">${esc(v.word)}</div>
+          ${v.pos ? `<div class="muted">${esc(v.pos)}</div>` : ""}
+          <div style="margin-top:8px">${spk(v.word)}</div>
+        </div>
+        <div class="choices">${choices.map((c, j) => `<button class="choice" data-j="${j}">${"①②③④"[j]} ${esc(c)}</button>`).join("")}</div>
+        <div id="after" hidden style="margin-top:14px">
+          ${v.ex ? `<div class="muted" style="margin-bottom:10px">${esc(v.ex)}</div>` : ""}
+          <button class="btn" id="next">${i + 1 < items.length ? "다음 문제" : "결과 보기"}</button>
+        </div>`;
+      let done = false;
+      $view.querySelectorAll(".choice").forEach(btn => btn.addEventListener("click", () => {
+        if (done) return; done = true;
+        const ok = choices[+btn.dataset.j] === v.meaning;
+        btn.classList.add(ok ? "right" : "wrong");
+        $view.querySelector(`[data-j="${choices.indexOf(v.meaning)}"]`).classList.add("right");
+        if (ok) { score++; missed.delete(v.word); } else { wrongs.push(v); missed.add(v.word); }
+        persist();
+        $view.querySelector("#after").hidden = false;
+        $view.querySelector("#next").onclick = () => { i++; i < items.length ? render() : finish(); };
+      }));
+    }
+    function finish() {
+      $view.innerHTML = `
+        <div class="card" style="text-align:center">
+          <div class="muted">${esc(name)} 뜻 고르기</div>
+          <div class="dd" style="font-size:44px;font-weight:800;margin:6px 0">${score} / ${items.length}</div>
+          <div class="muted">${score === items.length ? "전부 맞혔어요! 👏" : `${wrongs.length}개 틀렸어요. 틀린 단어는 오답 노트에 남아요.`}</div>
+        </div>
+        <div class="btns" style="margin-top:12px">
+          <a class="btn ghost" href="#/vocab/${day}">단어 목록</a>
+          ${wrongs.length ? `<a class="btn" href="#/vocab/${day}/quiz/wrong?r=${Date.now()}">틀린 것만 다시</a>`
+                          : `<a class="btn" href="#/vocab/${day}/quiz?r=${Date.now()}">새 문제 풀기</a>`}
+        </div>
+        ${wrongs.length ? `<div class="section-title">틀린 단어</div>
+          ${wrongs.map(v => `<div class="card word"><div><span class="w">${esc(v.word)}</span>${spk(v.word)}<div>${esc(v.meaning)}</div></div></div>`).join("")}` : ""}
+`;
+    }
+    render();
+  }
+
   // ---- 팁 ----
   function tips() {
     setHeader("파트별 팁"); setTab("tips");
@@ -317,7 +400,8 @@
     const parts = location.hash.replace(/^#\/?/, "").split("?")[0].split("/").filter(Boolean);
     window.scrollTo(0, 0);
     if (parts[0] === "grammar") parts[1] ? grammarDetail(parts[1]) : grammarList();
-    else if (parts[0] === "vocab") parts[2] === "cards" ? flashcards(parts[1], parts[3]) : vocabList(parts[1]);
+    else if (parts[0] === "vocab") parts[2] === "cards" ? flashcards(parts[1], parts[3])
+      : parts[2] === "quiz" ? vocabQuiz(parts[1], parts[3]) : vocabList(parts[1]);
     else if (parts[0] === "tips") tips();
     else home();
   }
